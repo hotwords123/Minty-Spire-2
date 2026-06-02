@@ -1,5 +1,6 @@
 ﻿using Godot;
 using HarmonyLib;
+using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -134,7 +135,9 @@ public static class RestHPRender
     /// <summary>
     ///     Catch HP changes to dynamically update the label (in case of Eternal Feather)
     /// </summary>
-    public static void CatchHPChange(Creature creature)
+    [HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.Heal))]
+    [HarmonyPostfix]
+    public static void CatchHPChange(Creature creature, decimal amount, bool playAnim)
     {
         if (!LocalContext.IsMe(creature) || Wiz.IsInCombat()) return;
         ValidButtons.ForEachLive(UpdateExtraLabel);

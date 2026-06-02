@@ -5,7 +5,6 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Relics;
 using MegaCrit.Sts2.Core.Rooms;
@@ -17,22 +16,13 @@ namespace MintySpire2.util;
 
 public class MintyHooker : CustomSingletonModel
 {
-    public MintyHooker() : base(true, true)
+    public MintyHooker() : base(HookType.Combat)
     { }
-
-    public override bool ShouldReceiveCombatHooks => true;
-
-    // Rest site render
-    public override Task AfterCurrentHpChanged(Creature creature, decimal delta)
-    {
-        RestHPRender.CatchHPChange(creature);
-        return Task.CompletedTask;
-    }
-
+    
     // End turn relics
     public override Task AfterBlockGained(Creature creature, decimal amount, ValueProp props, CardModel? cardSource)
     {
-        if(LocalContext.IsMe(creature))
+        if (LocalContext.IsMe(creature))
             EndTurnRelicReminderService.NotifyRemindersMayHaveChanged();
         return Task.CompletedTask;
     }
@@ -70,7 +60,7 @@ public class MintyHooker : CustomSingletonModel
 
     public override Task AfterSideTurnEnd(PlayerChoiceContext choiceContext, CombatSide side, IEnumerable<Creature> participants)
     {
-        if(side == CombatSide.Player)
+        if (side == CombatSide.Player)
             EndTurnRelicReminderService.NotifyRemindersMayHaveChanged();
         return Task.CompletedTask;
     }
