@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Relics;
 using MegaCrit.Sts2.Core.Rooms;
@@ -16,7 +17,7 @@ namespace MintySpire2.util;
 
 public class MintyHooker : CustomSingletonModel
 {
-    public MintyHooker() : base(HookType.Combat)
+    public MintyHooker() : base(true, true)
     { }
 
     public override bool ShouldReceiveCombatHooks => true;
