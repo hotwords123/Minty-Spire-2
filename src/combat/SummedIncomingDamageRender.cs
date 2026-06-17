@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.MonsterMoves.Intents;
 using MegaCrit.Sts2.Core.Nodes.Combat;
@@ -171,6 +172,16 @@ public static class SummedIncomingDamageRender
     }
 
     private static int incomingCardDamage = 0;
+
+    private static void RefreshIncomingCardDamage(Player player)
+    {
+        var newInc = GetIncomingCardDamage(player);
+        if (newInc == incomingCardDamage)
+            return;
+
+        incomingCardDamage = newInc;
+        ValidBars.ForEachLive(RefreshVisibilityAndText);
+    }
     
     private static int GetIncomingCardDamage(Player player)
     {
@@ -188,8 +199,7 @@ public static class SummedIncomingDamageRender
                 continue;
 
             // Ignoring HP loss cards here
-            if(card.DynamicVars.ContainsKey("Damage"))
-                totalDamage += card.DynamicVars.Damage.IntValue;
+            totalDamage += card.DynamicVars.Values.OfType<DamageVar>().Sum(cvar => cvar.IntValue);
         }
 
         return totalDamage;
@@ -208,14 +218,21 @@ public static class SummedIncomingDamageRender
         {
             var player = LocalContext.GetMe(RunManager.Instance.State);
             if (player?.PlayerCombatState == null) return;
-            
-            var newInc = GetIncomingCardDamage(player);
-            if (newInc != incomingCardDamage)
-            {
-                incomingCardDamage = newInc;
-                ValidBars.ForEachLive(RefreshVisibilityAndText);
-            }
+
+            RefreshIncomingCardDamage(player);
         }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Wither), nameof(Wither.FakeUpgrade))]
+    private static void CatchWitherFakeUpgrade(Wither __instance)
+    {
+        if (!Config.ShowIncomingDamage || __instance.Pile is not { Type: PileType.Hand }) return;
+
+        var player = LocalContext.GetMe(RunManager.Instance.State);
+        if (player?.PlayerCombatState == null || __instance.Owner != player) return;
+
+        RefreshIncomingCardDamage(player);
     }
 
     /// <summary>
