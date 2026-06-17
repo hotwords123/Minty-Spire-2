@@ -5,7 +5,9 @@ using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Hooks;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.MonsterMoves.Intents;
@@ -199,10 +201,31 @@ public static class SummedIncomingDamageRender
                 continue;
 
             // Ignoring HP loss cards here
-            totalDamage += card.DynamicVars.Values.OfType<DamageVar>().Sum(cvar => cvar.IntValue);
+            totalDamage += card.DynamicVars.Values.OfType<DamageVar>().Sum(cvar => GetModifiedIncomingCardDamage(player, card, cvar));
         }
 
         return totalDamage;
+    }
+
+    private static int GetModifiedIncomingCardDamage(Player player, CardModel card, DamageVar damageVar)
+    {
+        var creature = player.Creature;
+        if (creature.CombatState == null)
+            return damageVar.IntValue;
+
+        var damage = Hook.ModifyDamage(
+            player.RunState,
+            creature.CombatState,
+            creature,
+            creature,
+            damageVar.BaseValue,
+            damageVar.Props,
+            card,
+            ModifyDamageHookType.All,
+            CardPreviewMode.None,
+            out _);
+
+        return Math.Max(0, (int)damage);
     }
     
     /// <summary>
@@ -260,8 +283,9 @@ public static class SummedIncomingDamageRender
         // Constrict power
         incomingDamage += creature.GetPower<ConstrictPower>()?.Amount ?? 0;
         
-        // End turn self damage cards (updated when the hand changes)
-        incomingDamage += incomingCardDamage;
+        // End turn self damage cards can be affected by current powers.
+        if (creature.Player != null)
+            incomingDamage += GetIncomingCardDamage(creature.Player);
 
         return incomingDamage;
     }
