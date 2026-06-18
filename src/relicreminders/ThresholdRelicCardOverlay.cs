@@ -32,6 +32,7 @@ public static class ThresholdRelicCardOverlay
     {
         var me = LocalContext.GetMe(runState);
         if (me == null) return;
+        ClearRelicTrackers();
         foreach (var relic in me.Relics)
         {
             IdentifyThresholdRelic(relic);
@@ -221,6 +222,14 @@ public static class ThresholdRelicCardOverlay
     private static bool HasAny()
     {
         return _penNib != null || _galacticDust != null || _nunchaku != null || _tuningFork != null;
+    }
+
+    private static void ClearRelicTrackers()
+    {
+        _penNib = null;
+        _galacticDust = null;
+        _nunchaku = null;
+        _tuningFork = null;
     }
     
     private static void IdentifyThresholdRelic(RelicModel relic)
