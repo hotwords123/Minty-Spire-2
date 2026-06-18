@@ -179,7 +179,7 @@ static class TwoAmountPowers
                 typeof(PaleBlueDotPower).Method(nameof(PaleBlueDotPower.ModifyHandDraw)),
                 typeof(ToricToughnessPower).Method(nameof(ToricToughnessPower.SetBlock)),
                 typeof(InfernoPower).Method(nameof(InfernoPower.IncrementSelfDamage)),
-                typeof(CrimsonMantlePower).Method(nameof(InfernoPower.IncrementSelfDamage)),
+                typeof(CrimsonMantlePower).Method(nameof(CrimsonMantlePower.IncrementSelfDamage)),
             ];
         }
 
