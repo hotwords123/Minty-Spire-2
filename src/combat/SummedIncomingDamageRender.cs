@@ -188,7 +188,8 @@ public static class SummedIncomingDamageRender
                 continue;
 
             // Ignoring HP loss cards here
-            totalDamage += card.DynamicVars.Damage.IntValue;
+            if(card.DynamicVars.ContainsKey("Damage"))
+                totalDamage += card.DynamicVars.Damage.IntValue;
         }
 
         return totalDamage;
