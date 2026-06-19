@@ -27,7 +27,7 @@ static class HistoryCourseTooltip
         return isThisPlayer && isAttackOrSkill && !isDupe;
     }
     
-    [HarmonyPatch(typeof(RelicModel), nameof(RelicModel.ExtraHoverTips), MethodType.Getter)]
+    [HarmonyPatch(typeof(RelicModel), "ExtraHoverTips", MethodType.Getter)]
     [HarmonyPostfix]
     static IEnumerable<IHoverTip> AddCardTooltip(IEnumerable<IHoverTip> __result, RelicModel __instance)
     {
